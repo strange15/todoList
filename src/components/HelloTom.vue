@@ -3,7 +3,7 @@
     <section class="todoapp">
       <header class="header">
         <h1>todos</h1>
-        <input class="new-todo" autofocus autocomplete="off" placeholder="What needs to be done?">
+        <input class="new-todo" autofocus autocomplete="off" placeholder="What needs to be done?" @keyup.enter="addTodo" v-model="newTodo">
       </header>
       <section class="main">
         <input class="toggle-all" type="checkbox">
@@ -11,7 +11,7 @@
           <li v-for="(todo, index) in todoList" :key="index" class="todo">
             <div class="view">
               <input class="toggle" type="checkbox">
-              <label></label>
+              <label class="todoName">{{ todo }}</label>
               <button class="destroy"></button>
             </div>
             <input class="edit" type="text">
@@ -33,7 +33,7 @@
             <a href="#/completed">Completed</a>
           </li>
         </ul>
-        <button class="clear-completed">Clear completed</button>
+        <button class="clear-completed" @click="clearCompleted">Clear completed</button>
       </footer>
     </section>
   </div>
@@ -46,7 +46,7 @@ export default {
    data () {
       return {
          todoList: [],
-         enterTodo: ''
+         newTodo: ''
       }
    },
    props: {},
@@ -54,16 +54,16 @@ export default {
       todolistItem
    },
    methods: {
-      addTodos: function () {
-         if (this.enterTodo === '') {
+      addTodo: function () {
+         if (this.newTodo === '') {
             return
          }
-         this.todoList.push(this.enterTodo)
-         this.enterTodo = ''
+         this.todoList.push(this.newTodo)
+         this.newTodo = ''
          console.log(this.todoList)
       },
-      removeCompleted: function () {
-         console.log('deleted')
+      clearCompleted: function () {
+         console.log('clearCompleted')
          this.todoList = []
       }
    },
@@ -253,6 +253,7 @@ label[for="toggle-all"] {
   position: absolute;
   top: 0;
   bottom: 0;
+  left: 0;
   margin: auto 0;
   border: none; /* Mobile Safari */
   -webkit-appearance: none;
@@ -409,6 +410,10 @@ html .clear-completed:active {
 
 .info a:hover {
   text-decoration: underline;
+}
+
+.todoName{
+  text-align: left;
 }
 
 /*
