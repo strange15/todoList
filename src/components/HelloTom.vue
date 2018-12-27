@@ -3,16 +3,28 @@
     <section class="todoapp">
       <header class="header">
         <h1>todos</h1>
-        <input class="new-todo" autofocus autocomplete="off" placeholder="What needs to be done?" @keyup.enter="addTodo" v-model="newTodo">
+        <input
+          class="new-todo"
+          autofocus
+          autocomplete="off"
+          placeholder="What needs to be done?"
+          @keyup.enter="addTodo"
+          v-model="newTodo"
+        >
       </header>
       <section class="main">
-        <input class="toggle-all" type="checkbox">
+        <input class="toggle-all" type="checkbox" @click="toggleAll">
         <ul class="todo-list">
-          <li v-for="(todo, index) in todoList" :key="index" class="todo">
+          <li
+            v-for="(todo, index) in todoList"
+            :key="index"
+            class="todo"
+            v-bind:class="{ completed:todo.isCompleted }"
+          >
             <div class="view">
-              <input class="toggle" type="checkbox">
-              <label class="todoName">{{ todo }}</label>
-              <button class="destroy"></button>
+              <input class="toggle" type="checkbox" v-model="todo.isCompleted" @click="checkedItem(todo)">
+              <label class="todoName">{{ todo.text }}</label>
+              <button class="destroy" @click="destroyItem(todo)"></button>
             </div>
             <input class="edit" type="text">
           </li>
@@ -46,7 +58,10 @@ export default {
    data () {
       return {
          todoList: [],
-         newTodo: ''
+         newTodo: '',
+         testObj: {
+            isChecked: false
+         }
       }
    },
    props: {},
@@ -58,12 +73,42 @@ export default {
          if (this.newTodo === '') {
             return
          }
-         this.todoList.push(this.newTodo)
+         this.todoList.push({
+            isCompleted: false,
+            text: this.newTodo
+         })
          this.newTodo = ''
-         console.log(this.todoList)
+      //  console.log(this.todoList)
+      },
+      toggleAll: function () {
+         //  var isAllChecked = this.todoList.filter(x => x.isCompleted === true).length === this.todoList.length
+         var isAllChecked = this.todoList.filter(function (x) { return x.isCompleted === true }).length === this.todoList.length
+         this.todoList = this.todoList.map(function (x) {
+            x.isCompleted = !isAllChecked
+            return x
+         })
+         //  this.todoList = this.todoList.map(x => {
+         //     x.isCompleted = !isAllChecked
+         //  })
+         //  var sum = this.todoList.length
+         //  var count = 0
+         //  this.todoList.forEach(todo => {
+         //     if (todo.isCompleted) {
+         //        count++
+         //     }
+         //     console.log('hi', todo.isCompleted)
+         //     if (count < sum) { }
+         //  })
+      },
+      checkedItem: function (el) {
+         el.isCompleted = !el.isCompleted
+      },
+      destroyItem: function (el) {
+         var index = this.todoList.indexOf(el)
+         if (index !== -1) this.todoList.splice(index, 1)
+         console.log('after this.todoList', this.todoList)
       },
       clearCompleted: function () {
-         console.log('clearCompleted')
          this.todoList = []
       }
    },
@@ -412,7 +457,7 @@ html .clear-completed:active {
   text-decoration: underline;
 }
 
-.todoName{
+.todoName {
   text-align: left;
 }
 
