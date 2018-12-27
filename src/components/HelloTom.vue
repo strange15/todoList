@@ -13,7 +13,7 @@
         >
       </header>
       <section class="main">
-        <input class="toggle-all" type="checkbox" @click="toggleAll">
+        <input class="toggle-all" type="checkbox" v-model="isAllChecked" @click="toggleAll">
         <ul class="todo-list">
           <li
             v-for="(todo, index) in todoList"
@@ -59,9 +59,7 @@ export default {
       return {
          todoList: [],
          newTodo: '',
-         testObj: {
-            isChecked: false
-         }
+         isAllChecked: false
       }
    },
    props: {},
@@ -78,35 +76,24 @@ export default {
             text: this.newTodo
          })
          this.newTodo = ''
-      //  console.log(this.todoList)
       },
       toggleAll: function () {
-         //  var isAllChecked = this.todoList.filter(x => x.isCompleted === true).length === this.todoList.length
-         var isAllChecked = this.todoList.filter(function (x) { return x.isCompleted === true }).length === this.todoList.length
+         var that = this
+         that.isAllChecked = this.todoList.filter(function (x) { return x.isCompleted === true }).length === this.todoList.length
+         console.log(that.isAllChecked)
+
          this.todoList = this.todoList.map(function (x) {
-            x.isCompleted = !isAllChecked
+            x.isCompleted = !(that.isAllChecked)
             return x
          })
-         //  this.todoList = this.todoList.map(x => {
-         //     x.isCompleted = !isAllChecked
-         //  })
-         //  var sum = this.todoList.length
-         //  var count = 0
-         //  this.todoList.forEach(todo => {
-         //     if (todo.isCompleted) {
-         //        count++
-         //     }
-         //     console.log('hi', todo.isCompleted)
-         //     if (count < sum) { }
-         //  })
       },
       checkedItem: function (el) {
          el.isCompleted = !el.isCompleted
+         this.isAllChecked = this.todoList.filter(function (x) { return x.isCompleted === true }).length === this.todoList.length
       },
       destroyItem: function (el) {
          var index = this.todoList.indexOf(el)
          if (index !== -1) this.todoList.splice(index, 1)
-         console.log('after this.todoList', this.todoList)
       },
       clearCompleted: function () {
          this.todoList = []
