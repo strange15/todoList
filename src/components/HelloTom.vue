@@ -16,7 +16,7 @@
         <input class="toggle-all" type="checkbox" v-model="isAllChecked" @click="toggleAll">
         <ul class="todo-list">
           <li
-            v-for="(todo, index) in todoList"
+            v-for="(todo, index) in filteredTodos"
             :key="index"
             class="todo"
             v-bind:class="{ completed:todo.isCompleted }"
@@ -30,19 +30,19 @@
           </li>
         </ul>
       </section>
-      <footer class="footer">
+      <footer class="footer" v-show="hasItem">
         <span class="todo-count">
-          <strong>1</strong> 1 left
+          <strong>{{ totalItems }}</strong> left
         </span>
         <ul class="filters">
           <li>
-            <a href="#/all">All</a>
+            <a @click="filterOption('all')" v-bind:class="{ selected: (visibility == 'all')}">All</a>
           </li>
           <li>
-            <a href="#/active">Active</a>
+            <a @click="filterOption('active')" v-bind:class="{ selected: visibility == 'active'}">Active</a>
           </li>
           <li>
-            <a href="#/completed">Completed</a>
+            <a @click="filterOption('completed')" v-bind:class="{ selected: visibility == 'completed'}">Completed</a>
           </li>
         </ul>
         <button class="clear-completed" @click="clearCompleted">Clear completed</button>
@@ -53,13 +53,31 @@
 
 <script>
 import todolistItem from '@/components/todolistItem'
+// visibility filters
+var filters = {
+   all: function (todos) {
+      return todos
+   },
+   active: function (todos) {
+      return todos.filter(function (todo) {
+         return !todo.isCompleted
+      })
+   },
+   completed: function (todos) {
+      return todos.filter(function (todo) {
+         return todo.isCompleted
+      })
+   }
+}
 export default {
    name: 'HelloTom',
    data () {
       return {
-         todoList: [],
+         todos: [],
          newTodo: '',
-         isAllChecked: false
+         isAllChecked: false,
+         //  filterSelected: 'all', // TODO 參考大神寫法
+         visibility: 'all'
       }
    },
    props: {},
@@ -71,7 +89,7 @@ export default {
          if (this.newTodo === '') {
             return
          }
-         this.todoList.push({
+         this.todos.push({
             isCompleted: false,
             text: this.newTodo
          })
@@ -79,30 +97,58 @@ export default {
       },
       toggleAll: function () {
          var that = this
-         that.isAllChecked = this.todoList.filter(function (x) { return x.isCompleted === true }).length === this.todoList.length
-         console.log(that.isAllChecked)
-
-         this.todoList = this.todoList.map(function (x) {
+         that.isAllChecked = this.todos.filter(function (x) { return x.isCompleted }).length === this.todos.length
+         this.todos = this.todos.map(function (x) {
             x.isCompleted = !(that.isAllChecked)
             return x
          })
       },
       checkedItem: function (el) {
          el.isCompleted = !el.isCompleted
-         this.isAllChecked = this.todoList.filter(function (x) { return x.isCompleted === true }).length === this.todoList.length
+         this.isAllChecked = this.todos.filter(function (x) { return x.isCompleted }).length === this.todos.length
       },
       destroyItem: function (el) {
-         var index = this.todoList.indexOf(el)
-         if (index !== -1) this.todoList.splice(index, 1)
+         var index = this.todos.indexOf(el)
+         if (index !== -1) this.todos.splice(index, 1)
       },
       clearCompleted: function () {
-         this.todoList = []
+         //  var that = this
+
+         this.todos = this.todos.filter(function (x) {
+            return x.isCompleted === false
+         })
+         //  that.todos.forEach(function (x) {
+         //     console.log('outside x', x.text)
+         //     if (x.isCompleted === true) {
+         //        console.log('inside x', x.text)
+         //        var index = that.todos.indexOf(x)
+         //        that.todos.splice(index, 1)
+         //     }
+         //     // return x
+         //  })
+      },
+      filterOption: function (option) {
+         if (this.visibility === option) { return }
+         this.visibility = option
       }
    },
    computed: {
-      // result: function () {
-      //    return this.param1 * this.param2
-      // }
+      totalItems: function () {
+         return this.totalTodoItemLength + ((this.totalTodoItemLength > 1 || this.totalTodoItemLength === 0) ? ' items' : ' item')
+      },
+      finishedItemList: function () {
+         return this.todos.filter(function (x) { return x.isCompleted })
+      },
+      totalTodoItemLength: function () {
+         return this.todos.length - this.finishedItemList.length
+      },
+      hasItem: function () {
+         return this.todos.length > 0
+      },
+      filteredTodos: function () {
+         return filters[this.visibility](this.todos)
+      }
+
    }
 }
 </script>
